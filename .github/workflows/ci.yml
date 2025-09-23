@@ -32,18 +32,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # 4. Build backend
+      # 4. Make Maven Wrapper executable
+      - name: Make Maven Wrapper Executable
+        working-directory: ./ojasBackEnd/ojas-backend
+        run: chmod +x mvnw
+
+      # 5. Build backend
       - name: Build Backend
         working-directory: ./ojasBackEnd/ojas-backend
         run: ./mvnw clean package -DskipTests
 
-      # 5. Set up Node.js for React
+      # 6. Set up Node.js for React
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 6. Cache npm dependencies
+      # 7. Cache npm dependencies
       - name: Cache npm
         uses: actions/cache@v3
         with:
@@ -52,7 +57,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # 7. Build frontend
+      # 8. Build frontend
       - name: Build Frontend
         working-directory: ./ojas
         run: |
