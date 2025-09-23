@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ojas-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Vnav@1790000
+      MYSQL_DATABASE: ojas
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+  test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pVnav@1790000"]
+  interval: 5s
+  timeout: 3s
+  retries: 20
+
+
+  backend:
+    build:
+      context: ./ojasBackEnd/ojas-backend
+      dockerfile: Dockerfile
+    image: ojas-backend:latest
+    container_name: ojas-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ojas?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Vnav@1790000
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8081:8081"
+    networks:
+      - ojas-net
+
+  frontend:
+    build:
+      context: ./ojas
+      dockerfile: Dockerfile
+    image: ojas-frontend:latest
+    container_name: ojas-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"   # host:container -> browse http://localhost:5173
+    networks:
+      - ojas-net
+
+volumes:
+  db_data: {}
+
+networks:
+  ojas-net:
+    driver: bridge
