@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/items")
-@CrossOrigin(origins = "http://3.g.253.9:5173", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ItemController {
 	@Autowired
     private AuctionItemService auctionItemService;

@@ -1,0 +1,65 @@
+name: Full-Stack CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Java for Spring Boot
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Fix: specify JDK distribution
+          java-version: '21'
+
+      # 3. Cache Maven dependencies
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/apache/maven/plugins/maven-surefire-plugin
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # 4. Make Maven Wrapper executable
+      - name: Make Maven Wrapper Executable
+        working-directory: ./ojasBackEnd/ojas-backend
+        run: chmod +x mvnw
+
+      # 5. Build backend
+      - name: Build Backend
+        working-directory: ./ojasBackEnd/ojas-backend
+        run: ./mvnw clean package -DskipTests
+
+      # 6. Set up Node.js for React
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 7. Cache npm dependencies
+      - name: Cache npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 8. Build frontend
+      - name: Build Frontend
+        working-directory: ./ojas
+        run: |
+          npm install
+          npm run build

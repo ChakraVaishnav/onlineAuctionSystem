@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://3.7.253.9:8081';
+const BASE_URL = 'http://localhost:8081'
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token')
